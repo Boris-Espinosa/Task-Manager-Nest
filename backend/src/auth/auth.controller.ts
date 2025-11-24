@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserInputDto } from './dto/input-user.dto';
-import { AuthGuard } from './auth.guard';
+import { AuthGuard } from '../common/guards/auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -29,7 +29,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get('me')
-  currentUser(@Req() { user }) {
-    return user;
+  currentUser(@Req() { clientUser }) {
+    return this.authService.currentUser(clientUser);
   }
 }

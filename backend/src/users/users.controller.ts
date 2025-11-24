@@ -7,60 +7,48 @@ import {
   Param,
   Delete,
   ValidationPipe,
-  ParseIntPipe,
-  Header,
   Req,
-  HttpException,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './user.entity';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { type AuthenticatedRequest } from './interfaces/AuthenticatedRequest';
+import { AuthGuard } from 'src/common/guards/auth.guard';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private usersService: UsersService) {}
 
   @Post()
   create(
-    @Body(new ValidationPipe()) createUserDto: CreateUserDto,
-  ): Promise<User | HttpException> {
+    @Body(new ValidationPipe({ whitelist: true })) createUserDto: CreateUserDto,
+  ) {
     return this.usersService.create(createUserDto);
   }
 
   @Get()
-  findAll(): Promise<User[] | HttpException> {
+  findAll() {
     return this.usersService.findAll();
   }
   @UseGuards(AuthGuard)
   @Get(':id')
-  findOne(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<User | HttpException> {
-    return this.usersService.findOne(id);
+  findOne(@Param('id') id: string) {
+    return this.usersService.findOne(+id);
   }
 
   @UseGuards(AuthGuard)
   @Patch(':id')
   update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: string,
     @Body(new ValidationPipe({ skipNullProperties: true, whitelist: true }))
     updateUserDto: UpdateUserDto,
-    @Req() req: AuthenticatedRequest,
+    @Req() { clientUser },
   ) {
-    const clientUser = req.clientUser;
-    return this.usersService.update(id, updateUserDto, clientUser);
+    return this.usersService.update(+id, updateUserDto, clientUser);
   }
   @UseGuards(AuthGuard)
   @Delete(':id')
-  remove(
-    @Param('id', ParseIntPipe) id: number,
-    @Req() req: AuthenticatedRequest,
-  ) {
-    const clientUser = req.clientUser;
-    return this.usersService.remove(id, clientUser);
+  remove(@Param('id') id: string, @Req() { clientUser }) {
+    return this.usersService.remove(+id, clientUser);
   }
 }

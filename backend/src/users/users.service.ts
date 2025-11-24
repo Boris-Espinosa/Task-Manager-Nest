@@ -10,7 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { ClientUser } from './interfaces/clientUser';
+import { ClientUser } from '../common/interfaces/clientUser';
 
 @Injectable()
 export class UsersService {
@@ -57,20 +57,20 @@ export class UsersService {
     );
     if (!hasValidFields)
       throw new HttpException(
-        'There must be at leat 1 valid update value (email, password, username)',
+        'There must be at leat 1 valid update value (email | password | username)',
         HttpStatus.BAD_REQUEST,
       );
     const user = await this.userRepository.findOneBy({ id });
     if (!user)
       throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
     const updates = { ...updateUserDto };
-    if (typeof updateUserDto.password !== 'undefined') {
+    if (updateUserDto.password !== undefined) {
       const passwordHash = await bcrypt.hash(updateUserDto.password, 10);
       updates.password = passwordHash;
     }
     await this.userRepository.update(
       { id },
-      { ...updates, updated_at: new Date(Date.now()) },
+      { ...updates, updated_at: new Date() },
     );
     const userPatched = await this.userRepository.findOneBy({ id });
     return userPatched;

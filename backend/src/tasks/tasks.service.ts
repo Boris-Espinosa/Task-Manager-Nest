@@ -9,7 +9,7 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from './task.entity';
 import { Repository } from 'typeorm';
-import { ClientUser } from '../users/interfaces/clientUser';
+import { ClientUser } from '../common/interfaces/clientUser';
 
 @Injectable()
 export class TasksService {
@@ -38,14 +38,14 @@ export class TasksService {
   async findOne(id: number, clientUser: ClientUser) {
     const task = await this.tasksRepository.findOne({
       where: {
+        id,
         author_id: clientUser.id,
-        id: id,
       },
       relations: ['created_by'],
     });
 
     if (!task) {
-      throw new NotFoundException('Task not found');
+      throw new NotFoundException('Task not found or unauthorized');
     }
 
     return task;
@@ -69,7 +69,7 @@ export class TasksService {
 
     await this.tasksRepository.update(
       { id },
-      { ...updateTaskDto, updated_at: new Date(Date.now()) },
+      { ...updateTaskDto, updated_at: new Date() },
     );
 
     return await this.tasksRepository.findOneBy({ id });

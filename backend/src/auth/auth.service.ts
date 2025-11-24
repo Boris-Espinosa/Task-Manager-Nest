@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/user.entity';
@@ -6,6 +10,7 @@ import { Repository } from 'typeorm';
 import { UserInputDto } from './dto/input-user.dto';
 import 'dotenv/config';
 import * as bcrypt from 'bcrypt';
+import { ClientUser } from 'src/common/interfaces/clientUser';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +23,7 @@ export class AuthService {
     const user = await this.userRepository.findOneBy({
       email: userInput.email,
     });
-    if (!user) throw new UnauthorizedException();
+    if (!user) throw new NotFoundException('Email not found');
 
     const isMatch = await bcrypt.compare(userInput.password, user.password);
     if (!isMatch) throw new UnauthorizedException();
@@ -35,5 +40,15 @@ export class AuthService {
       username: user.username,
       email: user.email,
     };
+  }
+
+  async currentUser(clientUser: ClientUser) {
+    const userFound = await this.userRepository.findOneBy({
+      id: clientUser.id,
+    });
+    if (!userFound)
+      throw new NotFoundException('Your user does not exists amymore');
+
+    return userFound;
   }
 }
