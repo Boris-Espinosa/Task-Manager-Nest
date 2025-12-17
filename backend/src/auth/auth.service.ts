@@ -9,7 +9,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/user.entity';
 import { Repository } from 'typeorm';
 import { UserInputDto } from './dto/input-user.dto';
-import 'dotenv/config';
 import * as bcrypt from 'bcrypt';
 import { type ClientUser } from 'src/common/interfaces/clientUser';
 import { AuthGuard } from 'src/common/guards/auth.guard';
