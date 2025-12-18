@@ -2,7 +2,6 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
-  UseGuards,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,7 +10,6 @@ import { Repository } from 'typeorm';
 import { UserInputDto } from './dto/input-user.dto';
 import * as bcrypt from 'bcrypt';
 import { type ClientUser } from 'src/common/interfaces/clientUser';
-import { AuthGuard } from 'src/common/guards/auth.guard';
 
 @Injectable()
 export class AuthService {
@@ -42,7 +40,7 @@ export class AuthService {
       email: user.email,
     };
   }
-  @UseGuards(AuthGuard)
+
   async currentUser(clientUser: ClientUser) {
     const userFound = await this.userRepository.findOneBy({
       id: clientUser.id,
